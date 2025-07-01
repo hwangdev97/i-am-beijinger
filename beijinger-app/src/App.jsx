@@ -10,6 +10,7 @@ import KeyConfigModal from './components/KeyConfigModal';
 import TextToSpeech from './components/TextToSpeech';
 import SpeechToText from './components/SpeechToText';
 import WebToSpeech from './components/WebToSpeech';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('text-to-speech');
@@ -157,6 +158,9 @@ function AppContent() {
         isOpen={showKeyModal} 
         onClose={() => setShowKeyModal(false)} 
       />
+
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
     </div>
   );
 }
