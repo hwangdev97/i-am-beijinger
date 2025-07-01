@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北京人模拟器 - 功能测试</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .feature {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .warning { background: #fff3cd; color: #856404; }
+        .error { background: #f8d7da; color: #721c24; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎭 北京人模拟器 - 功能测试</h1>
+    
+    <div class="feature">
+        <h2>🔧 环境检测</h2>
+        <div id="environment-check">
+            <p>检测中...</p>
+        </div>
+    </div>
+
+    <div class="feature">
+        <h2>🎙️ 语音识别测试</h2>
+        <div id="speech-recognition-test">
+            <button onclick="testSpeechRecognition()">测试语音识别支持</button>
+            <div id="speech-result"></div>
+        </div>
+    </div>
+
+    <div class="feature">
+        <h2>🔊 音频播放测试</h2>
+        <div id="audio-test">
+            <button onclick="testAudioPlayback()">测试音频播放</button>
+            <div id="audio-result"></div>
+        </div>
+    </div>
+
+    <div class="feature">
+        <h2>📱 PWA 功能测试</h2>
+        <div id="pwa-test">
+            <button onclick="testPWAFeatures()">测试 PWA 功能</button>
+            <div id="pwa-result"></div>
+        </div>
+    </div>
+
+    <div class="feature">
+        <h2>🌐 网络请求测试</h2>
+        <div id="network-test">
+            <input type="text" id="test-url" placeholder="输入测试URL" value="https://httpbin.org/json">
+            <button onclick="testNetworkRequest()">测试网络请求</button>
+            <div id="network-result"></div>
+        </div>
+    </div>
+
+    <script>
+        // 环境检测
+        function checkEnvironment() {
+            const checks = {
+                'JavaScript': typeof window !== 'undefined',
+                'Local Storage': typeof localStorage !== 'undefined',
+                'Fetch API': typeof fetch !== 'undefined',
+                'Web Audio API': typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined',
+                'Media Devices': typeof navigator.mediaDevices !== 'undefined',
+                'Service Worker': 'serviceWorker' in navigator,
+                'Web Speech API': 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window
+            };
+
+            let html = '<ul>';
+            for (const [feature, supported] of Object.entries(checks)) {
+                const status = supported ? 'success' : 'error';
+                const text = supported ? '✅ 支持' : '❌ 不支持';
+                html += `<li><strong>${feature}</strong>: <span class="status ${status}">${text}</span></li>`;
+            }
+            html += '</ul>';
+
+            document.getElementById('environment-check').innerHTML = html;
+        }
+
+        // 测试语音识别
+        function testSpeechRecognition() {
+            const resultDiv = document.getElementById('speech-result');
+            
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                resultDiv.innerHTML = '<span class="status error">❌ 浏览器不支持语音识别</span>';
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            
+            recognition.lang = 'zh-CN';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                resultDiv.innerHTML = '<span class="status warning">🎤 请说话...</span>';
+            };
+
+            recognition.onresult = (event) => {
+                const result = event.results[0][0].transcript;
+                resultDiv.innerHTML = `<span class="status success">✅ 识别成功</span><br>识别结果: "${result}"`;
+            };
+
+            recognition.onerror = (event) => {
+                resultDiv.innerHTML = `<span class="status error">❌ 识别失败: ${event.error}</span>`;
+            };
+
+            recognition.start();
+        }
+
+        // 测试音频播放
+        function testAudioPlayback() {
+            const resultDiv = document.getElementById('audio-result');
+            
+            try {
+                const audio = new Audio();
+                audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmcaAcyZyvXVNVAABJNRQUAAQi0BAAAAAAABAAAAAATEAAAgAAAQEBAAQDIBAAAEAoAAAEAQAAAAAAAAAAAQAAAAAuYAAA';
+                
+                audio.oncanplaythrough = () => {
+                    resultDiv.innerHTML = '<span class="status success">✅ 音频播放支持正常</span>';
+                };
+
+                audio.onerror = () => {
+                    resultDiv.innerHTML = '<span class="status error">❌ 音频播放失败</span>';
+                };
+
+                audio.load();
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="status error">❌ 音频测试失败: ${error.message}</span>`;
+            }
+        }
+
+        // 测试PWA功能
+        function testPWAFeatures() {
+            const resultDiv = document.getElementById('pwa-result');
+            let html = '<ul>';
+
+            // Service Worker
+            if ('serviceWorker' in navigator) {
+                html += '<li><span class="status success">✅ Service Worker 支持</span></li>';
+            } else {
+                html += '<li><span class="status error">❌ Service Worker 不支持</span></li>';
+            }
+
+            // Manifest
+            const manifestLink = document.querySelector('link[rel="manifest"]');
+            if (manifestLink) {
+                html += '<li><span class="status success">✅ Web App Manifest 已配置</span></li>';
+            } else {
+                html += '<li><span class="status warning">⚠️ Web App Manifest 未找到</span></li>';
+            }
+
+            // 安装提示
+            if ('beforeinstallprompt' in window) {
+                html += '<li><span class="status success">✅ PWA 安装提示支持</span></li>';
+            } else {
+                html += '<li><span class="status warning">⚠️ PWA 安装提示不支持</span></li>';
+            }
+
+            html += '</ul>';
+            resultDiv.innerHTML = html;
+        }
+
+        // 测试网络请求
+        async function testNetworkRequest() {
+            const resultDiv = document.getElementById('network-result');
+            const url = document.getElementById('test-url').value;
+
+            if (!url) {
+                resultDiv.innerHTML = '<span class="status error">❌ 请输入测试URL</span>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<span class="status warning">🔄 测试中...</span>';
+
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <span class="status success">✅ 网络请求成功</span><br>
+                        状态码: ${response.status}<br>
+                        <details>
+                            <summary>响应数据</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<span class="status error">❌ 请求失败: ${response.status} ${response.statusText}</span>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="status error">❌ 网络错误: ${error.message}</span>`;
+            }
+        }
+
+        // 页面加载完成后执行环境检测
+        document.addEventListener('DOMContentLoaded', checkEnvironment);
+    </script>
+</body>
+</html>
